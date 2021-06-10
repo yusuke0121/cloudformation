@@ -1,0 +1,92 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Resources:
+
+ #=================================
+ # VPCの作成
+ #=================================
+  tpVPC:
+    Type: "AWS::EC2::VPC"
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: 'true'
+      EnableDnsHostnames: 'true'
+      Tags:
+      - Key: Name
+        Value: test_vpc
+
+  cfnSubnet:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      AvailabilityZone: "ap-northeast-1a"
+      CidrBlock: 10.0.0.1/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: test-cfn-subnet
+      VpcId: !Ref tpVPC
+
+  PubSubRT:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref tpVPC
+      Tags:
+        - Key: Name
+          Value: pub-sub-a-rt-cf
+
+  PubSubToInternet:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PubSubRT
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref IGW
+
+  AssoPubSubRT:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref cfnSubnet
+      RouteTableId: !Ref PubSubRT    
+                    
+
+  IGW:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: igw-cf
+
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref tpVPC
+      InternetGatewayId: !Ref IGW
+
+  Ec2Instance:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      KeyName: keykey
+      ImageId: ami-00d101850e971728d
+      InstanceType: t2.micro
+      NetworkInterfaces: 
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          SubnetId: !Ref cfnSubnet
+          GroupSet:
+            - !Ref InstanceSecurityGroup
+      Tags:
+          - Key: Name
+            Value: ec2-a-cf      
+
+  
+  InstanceSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Enable SSH access via port 22
+      VpcId: !Ref tpVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '22'
+          ToPort: '22'
+          CidrIp: 0.0.0.0/0    
+
