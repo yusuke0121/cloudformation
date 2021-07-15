@@ -77,13 +77,7 @@ Resources:
       Tags:
           - Key: Name
             Value: ec2-a-cf
-  # ElasticIp定義
-  RaisetechLive10EIP:
-    Type: AWS::EC2::EIPAssociation
-    Properties:
-      EIP: 54.238.161.204
-      InstanceId: !Ref ec2-a-cf
-    DependsOn: ec2-a-cf               
+             
 
   
   InstanceSecurityGroup:
