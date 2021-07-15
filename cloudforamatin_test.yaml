@@ -76,7 +76,14 @@ Resources:
             - !Ref InstanceSecurityGroup
       Tags:
           - Key: Name
-            Value: ec2-a-cf      
+            Value: ec2-a-cf
+  # ElasticIp定義
+  RaisetechLive10EIP:
+    Type: AWS::EC2::EIPAssociation
+    Properties:
+      EIP: 54.238.161.204
+      InstanceId: !Ref ec2-a-cf
+    DependsOn: ec2-a-cf               
 
   
   InstanceSecurityGroup:
@@ -88,5 +95,13 @@ Resources:
         - IpProtocol: tcp
           FromPort: '22'
           ToPort: '22'
-          CidrIp: 0.0.0.0/0    
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: '80'
+          ToPort: '80'
+          CidrIp: 0.0.0.0/0          
+
+
+          
+              
 
