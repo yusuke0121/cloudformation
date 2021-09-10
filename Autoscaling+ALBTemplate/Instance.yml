@@ -1,0 +1,101 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+
+Metadata:
+  "AWS::CloudFormation::Interface":
+    ParameterGroups:
+      - Label:
+          default: "Instance Properties"
+        Parameters:
+          - EC2InstanceInstanceType
+          - KeyPairName
+          - EC2AMI
+      - Label:
+          default: "Scaling Policy for AverageCPUUtilization "
+        Parameters:  
+          - CPUPolicyTargetValue   
+      
+
+
+
+
+
+Parameters:
+
+  EC2InstanceInstanceType:
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - "t2.micro"
+      - "t3.micro"
+      - "m1.small"
+  KeyPairName:
+    Type: AWS::EC2::KeyPair::KeyName 
+  EC2AMI:
+    Type: AWS::EC2::Image::Id
+    Default: "ami-00d101850e971728d" 
+  CPUPolicyTargetValue:
+    Type: String    
+
+
+Resources:
+
+  # 起動テンプレート
+  asgtestLaunchConfiguration:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      ImageId: !Ref EC2AMI
+      InstanceType: !Ref EC2InstanceInstanceType
+      KeyName: !Ref KeyPairName
+      AssociatePublicIpAddress: true
+      UserData:
+        Fn::Base64: |
+             #!/bin/bash 
+             sudo yum -y update
+             sudo yum -y install httpd-devel httpd
+             sudo yum -y install http://dev.mysql.com/get/mysql57-community-release-el7-7.noarch.rpm
+             sudo yum install -y mysql-community-server
+             sudo systemctl start mysqld.service
+             sudo systemctl enable mysqld.service
+             sudo systemctl start httpd.service
+             sudo systemctl enable httpd.service
+      SecurityGroups:
+        - !ImportValue ec2SecurityGroup
+  
+  # AutoScalingGroupの作成
+  asgtestAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AutoScalingGroupName: TestGroup
+      DesiredCapacity: 1
+      LaunchConfigurationName: !Ref asgtestLaunchConfiguration
+      MaxSize: 3
+      MinSize: 1
+      MetricsCollection: 
+        - Granularity: 1Minute
+      Tags:
+        - Key: Name
+          Value: TestGroup
+          PropagateAtLaunch: true
+      VPCZoneIdentifier:
+        - !ImportValue PublicSubnet1
+        - !ImportValue PublicSubnet2
+      TargetGroupARNs:
+        - !ImportValue ALBTargetGroup
+      TerminationPolicies:
+        - NewestInstance
+
+    
+  # スケーリングポリシー  
+  ASGScalingPolicyHigh: 
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties: 
+      AutoScalingGroupName: !Ref asgtestAutoScalingGroup
+      PolicyType: TargetTrackingScaling
+      TargetTrackingConfiguration:
+        DisableScaleIn: False
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ASGAverageCPUUtilization
+        TargetValue: !Ref CPUPolicyTargetValue
+
+
