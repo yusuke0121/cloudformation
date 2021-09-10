@@ -9,5 +9,8 @@ RDS
 
 Network,Instance,DBInstanceのクロススタックで構成。
 
+起動テンプレートにapache,mysplをインストールするよう
+Userdateで記載。
+
 
 
