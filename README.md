@@ -1,3 +1,4 @@
+![Autoscaling+ALBTemplate構成図](https://user-images.githubusercontent.com/81822861/132930528-d4920826-823d-45b0-a461-9c642e76a409.png)
 # cloudformation
 YAML template
 
