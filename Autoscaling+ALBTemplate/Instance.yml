@@ -14,11 +14,7 @@ Metadata:
           default: "Scaling Policy for AverageCPUUtilization "
         Parameters:  
           - CPUPolicyTargetValue   
-      
-
-
-
-
+    
 
 Parameters:
 
