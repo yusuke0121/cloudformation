@@ -150,7 +150,7 @@ Resources:
       - Key: Name
         Value: test_subnetB_RT        
 
-
+  # ルーティング
   PubSubToInternet:
     Type: AWS::EC2::Route
     Properties:
@@ -217,7 +217,8 @@ Resources:
       Protocol: HTTP
       UnhealthyThresholdCount: 5
       VpcId: !Ref testvpc1
-
+  
+  # リスナー設定
   Listner:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties: 
@@ -234,7 +235,7 @@ Resources:
   InstanceSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
-      GroupDescription: Enable SSH access via port 22
+      GroupDescription: Enable SSH access via port 22 80
       VpcId: !Ref testvpc1
       SecurityGroupIngress:
         - IpProtocol: tcp
