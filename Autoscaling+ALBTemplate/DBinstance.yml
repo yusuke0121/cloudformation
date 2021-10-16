@@ -1,5 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 
+Description: "データベース"
 
 Metadata:
   "AWS::CloudFormation::Interface":
@@ -9,7 +10,7 @@ Metadata:
         Parameters:
           - RDSMasterUsername
           - RDSMasterUserPassword
-          - WordPressUserDBPassword        
+          - RDSInstanceType        
 
 Parameters:
   RDSMasterUsername:
@@ -41,7 +42,7 @@ Resources:
       DBName: Test_Database  
       DBSubnetGroupName: !Ref rdsDBSubnetGroup
       Engine: mysql 
-      EngineVersion: 5.7.35
+      EngineVersion: 5.7.34
       MasterUsername: !Ref RDSMasterUsername
       MasterUserPassword: !Ref RDSMasterUserPassword
       MultiAZ: true 
